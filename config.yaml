@@ -1,0 +1,43 @@
+---
+global:
+  application:
+    host: moxy.gp.ath.cx
+    port: 9999
+  storage:
+    module: DBM_File
+    file: /tmp/moxy.gdbm
+    dbm_class: NDBM_File
+  server:
+    module: HTTPProxy
+    port: 9999
+    host: ""
+    max_clients: 80
+  log:
+    targets:
+      - module: Log::Dispatch::Screen
+        conf:
+          name: screen
+          min_level: debug
+          stderr: 1
+      - module: Log::Dispatch::File
+        conf:
+          name: file
+          min_level: info
+          filename: log.txt
+          mode: append
+
+plugins:
+  - module: Application
+  - module: Pictogram
+  - module: HTMLWidth
+  - module: HTTPEnv
+  - module: ControlPanel
+  - module: GPS
+  - module: UserAgentSwitcher
+  - module: XMLisHTML
+  - module: RefererCutter
+  - module: FlashUseImgTag
+  - module: DisableTableTag
+  - module: ShowHTTPHeaders
+  - module: QRCode
+

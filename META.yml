@@ -1,6 +1,7 @@
 --- 
-abstract: ~
-author: ~
+abstract: Mobile web development proxy
+author: 
+  - Kan Fushihara
 build_requires: 
   Path::Class: 0
   Test::More: 0
@@ -37,4 +38,4 @@ requires:
   UNIVERSAL::require: 0
   YAML: 0
 tests: t/*.t t/*/*.t t/*/*/*.t
-version: 0.04
+version: 0.05

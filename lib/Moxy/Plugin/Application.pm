@@ -24,9 +24,11 @@ sub register {
             my ($context, $args) = @_;
 
             my $uri = URI->new($args->{request}->uri);
+            $context->log(debug => "Request URI: $uri");
 
             if ( $uri->host eq $base_host && ($uri->port||80) == $base_port) {
                 my $auth_header = $args->{request}->header('Authorization');
+                $context->log(debug => "Authorization header: $auth_header");
                 if ($auth_header =~ /^Basic (.+)$/) {
                     my $auth = decode_base64($1);
                     $context->log(debug => "auth: $auth");
@@ -67,12 +69,14 @@ sub _render_control_panel {
 }
 
 sub _ua {
+    my ($class, $proxy_url) = @_;
+
     my $ua = LWP::UserAgent->new(
         agent         => "Moxy/$Moxy::VERSION",
         timeout       => $TIMEOUT,
         max_redirects => 0,
     );
-    $ua->proxy(['http'] => 'http://localhost:9999/');
+    $ua->proxy(['http'] => $proxy_url);
     $ua;
 }
 
@@ -84,8 +88,9 @@ sub _make_response {
         $req->uri($url);
         $req->header('Host' => URI->new($url)->host);
         $req->header('Proxy-Authorization' => "Basic @{[ encode_base64 $auth ]}");
-        my $ua = $class->_ua;
+        my $ua = $class->_ua($base);
         my $res = $ua->request($req);
+        $context->log(debug => '-- response status: ' . $res->code);
         if ($res->code == 302) {
             my $myres = HTTP::Response->new(200, 'Redirect by Moxy');
             $myres->header('Content-Type' => 'text/html; charset=utf8');
@@ -98,7 +103,12 @@ q{<html><head></head><body>Redirect to <a href="%s?q=%s">%s</a></body></html>},
             );
             return $myres;
         } else {
-            if ($res->header('Content-Type') =~ /html/i) {
+            my $content_type = $res->header('Content-Type');
+            if (!$content_type) {
+                warn "+++++++++++++++++++++++++++++++++++";
+                warn "++ Content-Type missing          ++ " . $res->code;
+                warn "+++++++++++++++++++++++++++++++++++";
+            } elsif ($content_type =~ /html/i) {
                 $res->content( _rewrite($base, $res->content, $url) );
             }
         }
@@ -191,6 +201,10 @@ Moxy::Plugin::Application - web proxy mode.
 =head1 DESCRIPTION
 
 This is web proxy mode plugin.
+
+=head1 DISCLAIMER
+
+THIS MODULE IS STILL ALPHA QUALITY
 
 =head1 AUTHOR
 

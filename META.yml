@@ -1,13 +1,12 @@
 --- 
 abstract: Mobile web development proxy
-author: 
-  - Kan Fushihara
+author: Kan Fushihara
 build_requires: 
   Path::Class: 0
   Test::More: 0
   Web::Scraper: 0.24
 distribution_type: module
-generated_by: Module::Install version 0.68
+generated_by: Module::Install version 0.650
 license: unknown
 meta-spec: 
   url: http://module-build.sourceforge.net/META-spec-v1.3.html
@@ -26,9 +25,10 @@ requires:
   CGI: 0
   Carp: 0
   Class::Accessor: 0
+  Encode::JP::Mobile: 0.22
   FindBin: 0
   Getopt::Long: 0
-  HTML::Entities::ImodePictogram: 0
+  HTML::ReplacePictogramMobileJp: 0.01
   HTTP::MobileAgent: 0
   HTTP::Proxy: 0
   Log::Dispatch: 0
@@ -38,4 +38,4 @@ requires:
   UNIVERSAL::require: 0
   YAML: 0
 tests: t/*.t t/*/*.t t/*/*/*.t
-version: 0.06
+version: 0.07

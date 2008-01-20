@@ -6,7 +6,6 @@ name("Moxy");
 all_from("lib/Moxy.pm");
 
 requires('HTTP::MobileAgent');
-requires('HTTP::Proxy');
 requires('CGI');
 requires('FindBin');
 requires('Path::Class');
@@ -19,7 +18,9 @@ requires('Class::Accessor');
 requires('UNIVERSAL::require');
 requires('Log::Dispatch');
 requires('Encode::JP::Mobile' => 0.22);
-requires 'HTML::ReplacePictogramMobileJp' => 0.01;
+requires 'HTML::ReplacePictogramMobileJp' => 0.03;
+requires 'HTTP::Proxy';
+requires 'Params::Validate';
 
 build_requires('Test::More');
 build_requires('Path::Class');
@@ -35,10 +36,6 @@ features(
         recommends('Test::Pod'),
         recommends('Test::Pod::Coverage'),
     ],
-    'StickyAny Plugin' => [
-        -default => 0,
-        recommends('HTML::StickyQuery'),
-    ]
 );
 
 tests 't/*.t t/*/*.t t/*/*/*.t';

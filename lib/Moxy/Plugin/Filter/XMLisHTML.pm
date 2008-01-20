@@ -1,4 +1,4 @@
-package Moxy::Plugin::XMLisHTML;
+package Moxy::Plugin::Filter::XMLisHTML;
 use strict;
 use warnings;
 
@@ -6,7 +6,7 @@ sub register {
     my ($class, $context) = @_;
 
     $context->register_hook(
-        response_filter_header => sub {
+        response_filter => sub {
             my ($context, $args) = @_;
 
             $args->{response}->header( 'Content-Type' => 'text/html' ) if $args->{response}->header( 'Content-Type' ) =~ /xml/;
@@ -21,7 +21,7 @@ __END__
 
 =head1 NAME
 
-Moxy::Plugin::XMLisHTML - XML is HTML
+Moxy::Plugin::Filter::XMLisHTML - XML is HTML
 
 =head1 SYNOPSIS
 

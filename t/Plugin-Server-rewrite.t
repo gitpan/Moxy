@@ -1,14 +1,14 @@
 use strict;
 use warnings;
 use Test::Base;
-use Moxy::Plugin::Application;
+use Moxy::Plugin::Server;
 
-sub rewrite {
-    Moxy::Plugin::Application::_rewrite('http://localhost:9999/', shift, 'http://relative.example.jp/');
+sub _rewrite {
+    Moxy::Plugin::Server::rewrite('http://localhost:9999/', shift, 'http://relative.example.jp/');
 }
 
 filters {
-    input => ['rewrite'],
+    input => ['_rewrite'],
     expected => ['chomp'],
 };
 

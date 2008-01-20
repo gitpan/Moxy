@@ -2,13 +2,21 @@
 - plugin should be server implementation independent
 
 - 絵文字入力できるようにしたい
+- Kwalify サポート
+- Class::Component を使うようにするかも
+- プラグインをもっと testable にしたい。
+- 認証まわりを flexible にしたい
+-- OpenID に対応するとか
+- cookie support
+-- 16:40 kan: でも、Moxy側でユーザを認証できてれば、なんとやれるんじゃない？
+-- 16:40 kan: HTTP clientとしての挙動をエミュレーションすれば
+- Moxy/Plugin/Server/POE つくってみるとか
 
 - plugins
  - GPS Support(select point by google map?)
  - support utn
  - check contents size(max pdu)
 
-- plugins: use render_template
 - plugins: $self is not a self... just a $class.
 
 - add tests.

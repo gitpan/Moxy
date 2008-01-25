@@ -12,6 +12,7 @@ use HTML::Entities;
 use URI::Escape;
 use MIME::Base64;
 use Params::Validate ':all';
+use URI::Heuristic qw(uf_uristr);
 our @EXPORT = qw/rewrite handle_request render_control_panel/;
 
 sub rewrite {
@@ -111,7 +112,7 @@ sub handle_request {
     if ($auth_header =~ /^Basic (.+)$/) {
         my $auth = decode_base64($1);
         $context->log(debug => "auth: $auth");
-        my $url = +{$uri->query_form}->{q};
+        my $url = uf_uristr(+{$uri->query_form}->{q});
         $context->log(info => "REQUEST $auth, @{[ $url || '' ]}");
         my $response = _make_response(
             context  => $context,
@@ -168,6 +169,8 @@ sub _make_response {
             if ($content_type =~ /html/i) {
                 $res->content( rewrite($base_url, $res->content, $url) );
             }
+            use bytes;
+            $res->header('Content-Length' => bytes::length($res->content));
         }
         return $res;
     } else {

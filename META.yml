@@ -38,4 +38,4 @@ requires:
   UNIVERSAL::require: 0
   YAML: 0
 tests: t/*.t t/*/*.t t/*/*/*.t
-version: 0.22
+version: 0.23

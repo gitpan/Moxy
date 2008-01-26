@@ -1,4 +1,3 @@
-.DS_Store
 .shipit
 assets/.DS_Store
 assets/common/useragent.yaml
@@ -1391,9 +1390,15 @@ inc/Module/Install/Include.pm
 inc/Module/Install/Makefile.pm
 inc/Module/Install/Metadata.pm
 inc/Module/Install/Scripts.pm
+inc/Module/Install/TestBase.pm
 inc/Module/Install/Win32.pm
 inc/Module/Install/WriteAll.pm
 inc/Path/Class.pm
+inc/Spiffy.pm
+inc/Test/Base.pm
+inc/Test/Base/Filter.pm
+inc/Test/Builder.pm
+inc/Test/Builder/Module.pm
 inc/Test/More.pm
 inc/Web/Scraper.pm
 lib/Moxy.pm
@@ -1422,12 +1427,10 @@ lib/Moxy/Storage/DBM_File.pm
 lib/Moxy/Util.pm
 Makefile.PL
 MANIFEST			This list of files
-MANIFEST.SKIP
 META.yml
 moxy.pl
 README
 t/00.load.t
-t/98_perlcritic.t
 t/Plugin-Server-rewrite.t
 t/Plugin-Server-xss.t
 t/pod.t

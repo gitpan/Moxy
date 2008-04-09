@@ -39,4 +39,4 @@ requires:
   UNIVERSAL::require: 0
   YAML: 0
 tests: t/*.t t/*/*.t t/*/*/*.t
-version: 0.24
+version: 0.25

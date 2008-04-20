@@ -1,17 +1,19 @@
 - ヘッダ追加
 -- my $depth = ( split /,/, $request->get('x-up-devcap-screendepth') )[0];                                                           
 -- my $color = $request->get('x-up-devcap-iscolor');                                                                                 
+- Plugin::UserID で serial を自由に設定できるようにしたい
+- POST のときに、uri の方のパラメータしかこない疑惑(reported by yappo)
 
-
-
+- なんか絵文字が変なときあるらしい
+--  19:53 kan: 絵文字キャリア変換できないパターンがあったと思うんだけど
+--  19:54 tokuhirom: なんだろ
+--  19:55 kan: SJIS実体参照で書いた絵文字が変換できないとかだった
 
 
 
 - Store::SQLite つくる?
 - 絵文字入力できるようにしたい
 - Kwalify サポート
-- Class::Component を使うようにするかも
-- プラグインをもっと testable にしたい。
 - 認証まわりを flexible にしたい
 -- OpenID に対応するとか
 - cookie support
@@ -22,8 +24,6 @@
  - GPS Support(select point by google map?)
  - support utn
  - check contents size(max pdu)
-
-- plugins: $self is not a self... just a $class.
 
 - add tests.
 

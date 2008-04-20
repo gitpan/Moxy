@@ -1,5 +1,0 @@
-<div style="background-color:#ddddff">
-    [% FOR part IN parts %]
-        <div>[% part.html %]</div>
-    [% END %]
-</div>

@@ -8,7 +8,7 @@ build_requires:
   Web::Scraper: 0.24
 distribution_type: module
 generated_by: Module::Install version 0.680
-license: unknown
+license: perl
 meta-spec: 
   url: http://module-build.sourceforge.net/META-spec-v1.3.html
   version: 1.3
@@ -25,11 +25,13 @@ requires:
   CGI: 0
   Carp: 0
   Class::Accessor: 0
+  Class::Component: 0.14
   Encode::JP::Mobile: 0.22
   FindBin: 0
   Getopt::Long: 0
   HTML::ReplacePictogramMobileJp: 0.03
   HTTP::MobileAgent: 0
+  HTTP::MobileAttribute: 0
   HTTP::Proxy: 0
   Log::Dispatch: 0
   Params::Validate: 0
@@ -39,4 +41,4 @@ requires:
   UNIVERSAL::require: 0
   YAML: 0
 tests: t/*.t t/*/*.t t/*/*/*.t
-version: 0.25
+version: 0.30

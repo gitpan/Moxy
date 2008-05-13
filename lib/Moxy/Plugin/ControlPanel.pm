@@ -4,7 +4,7 @@ use warnings;
 use base qw/Moxy::Plugin/;
 use Moxy::Util;
 
-sub render: Hook('response_filter') {
+sub response_filter: Hook {
     my ($self, $context, $args) = @_;
 
     return unless (($args->{response}->header('Content-Type')||'') =~ /html/);
@@ -25,7 +25,7 @@ sub render: Hook('response_filter') {
 
     # insert control panel to html response.
     my $content = $args->{response}->content;
-    $content =~ s!(<body.*?>)!"$1$output"!ie;
+    $content =~ s!(</body>)!$output$1!i;
     $args->{response}->content($content);
 }
 

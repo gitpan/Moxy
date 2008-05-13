@@ -1,33 +1,29 @@
 package Moxy;
 use strict;
 use warnings;
-use Class::Component;
+use Class::Component 0.16;
 
-our $VERSION = '0.32';
+our $VERSION = '0.40';
 
-use Path::Class;
-use YAML;
-use Encode;
-use FindBin;
-use UNIVERSAL::require;
 use Carp;
-use Scalar::Util qw/blessed/;
-use URI;
-use HTML::Parser;
-use URI::Escape;
-use HTML::Entities;
-use Scalar::Util qw/blessed/;
-use LWP::UserAgent;
-use HTML::Entities;
-use URI::Escape;
-use MIME::Base64;
-use Params::Validate ':all';
-use URI::Heuristic qw(uf_uristr);
+use Encode;
 use File::Spec::Functions;
-use YAML;
-use HTML::TreeBuilder;
-use Moxy::Util;
+use FindBin;
+use HTML::Entities;
+use HTML::Parser;
 use HTML::TreeBuilder::XPath;
+use HTML::TreeBuilder;
+use LWP::UserAgent;
+use MIME::Base64;
+use Moxy::Util;
+use Params::Validate ':all';
+use Path::Class;
+use Scalar::Util qw/blessed/;
+use UNIVERSAL::require;
+use URI::Escape;
+use URI::Heuristic qw(uf_uristr);
+use URI;
+use YAML;
 use HTTP::MobileAttribute plugins => [
     qw/CarrierLetter IS/,
     {
@@ -42,24 +38,18 @@ use HTTP::MobileAttribute plugins => [
 
 __PACKAGE__->load_components(qw/Plaggerize Autocall::InjectMethod Context/);
 
+__PACKAGE__->load_plugins(qw/DisplayWidth ControlPanel LocationBar Pictogram/);
+
 sub new {
     my ($class, $config) = @_;
 
     my $self = $class->NEXT( 'new' => { config => $config } );
 
+    $self->conf->{global}->{log}->{fh} ||= \*STDERR;
+
     $self->_init_storage;
 
     return $self;
-}
-
-sub run {
-    my $self = shift;
-
-    unless ($self->can('run_server')) {
-        die "Oops. please load Server Module\n";
-    }
-
-    $self->run_server();
 }
 
 sub assets_path {
@@ -120,7 +110,9 @@ sub rewrite {
         for my $node ( $tree->findnodes("//$tag") ) {
             if ( my $attr = $node->attr($attr_name) ) {
                 $node->attr(
-                    $attr_name => sprintf( qq{$base%s},
+                    $attr_name => sprintf( qq{%s%s%s},
+                        $base,
+                        ($base =~ m{/$} ? '' : '/'),
                         uri_escape( URI->new($attr)->abs($base_url) ) )
                 );
             }
@@ -142,60 +134,45 @@ sub rewrite {
     return $result;
 }
 
-sub render_control_panel {
-    my ($base, $current_url) = @_;
+sub render_start_page {
+    my $base = shift;
 
     return sprintf(<<"...");
-    <script>
+<?xml version="1.0" encoding="utf-8"?>
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+<html lang="ja" xml:lang="ja" xmlns="http://www.w3.org/1999/xhtml">
+<head>
+    <meta http-equiv="content-script-type" content="text/javascript" />
+    <script type="text/javascript">
         window.onload = function () {
             document.getElementById('moxy_url').focus();
         };
     </script>
+</head>
+<body>
     <form method="get" action="$base" onsubmit="location.href=location.href+encodeURIComponent(document.getElementById('moxy_url').value);return false;">
         <input type="text" size="40" id="moxy_url" />
         <input type="submit" value="go" />
     </form>
+</body>
+</html>
 ...
 }
 
 sub handle_request {
-    my $self = shift;
-    my %args = validate(
-        @_,
-        +{
-            request => { isa => 'HTTP::Request' },
-        }
-    );
+    my ($self, $c) = @_;
 
-    my $uri = URI->new($args{request}->uri);
-    $self->log(debug => "Request URI: $uri");
-
-    my $base = $uri->clone;
-    $base->path('');
-    $base->query_form({});
-
-    my $auth_header = $args{request}->header('Authorization');
-    $self->log(debug => "Authorization header: $auth_header");
-    if ($auth_header =~ /^Basic (.+)$/) {
-        my $auth = decode_base64($1);
-        $self->log(debug => "auth: $auth");
-        (my $url = $uri->path_query) =~ s!^/!!;
-        $url = uf_uristr(uri_unescape $url);
-        $self->log(info => "REQUEST $auth, @{[ $url || '' ]}");
-        my $response = $self->_make_response(
-            url      => $url,
-            request  => $args{request},
-            base_url => $base,
-            user_id  => $auth,
+    my $session_id = join ',', $c->req->headers->authorization_basic;
+    $self->log(debug => "Authorization header: $session_id");
+    if ($session_id) {
+        $self->_make_response(
+            c => $c,
+            user_id  => $session_id,
         );
-        return $response;
     } else {
-        my $response = HTTP::Response->new(401, 'Moxy needs authentication');
-        $response->header( 'WWW-Authenticate' =>
-            qq{Basic realm="Moxy needs basic auth.Only for identification.Password is dummy."}
-        );
-        $response->content('authentication required');
-        return $response;
+        $c->res->status(401);
+        $c->res->headers->www_authenticate(qq{Basic realm="Moxy needs basic auth.Only for identification.Password is dummy."});
+        $c->res->body('authentication required');
     }
 }
 
@@ -203,20 +180,24 @@ sub _make_response {
     my $self = shift;
     my %args = validate(
         @_ => +{
-            url      => qr{^https?://},
-            request  => { isa  => 'HTTP::Request' },
-            base_url => qr{^https?://},
-            user_id  => { type => SCALAR },
+            c       => { isa  => 'HTTP::Engine::Context', },
+            user_id => { type => SCALAR },
         }
     );
-    my $url = $args{url};
-    my $base_url = $args{base_url};
+    my $c = $args{c};
+
+    my $base = $c->req->uri->clone;
+    $base->path('');
+    $base->query_form({});
+
+    (my $url = $c->req->uri->path_query) =~ s!^/!!;
+    $url = uf_uristr(uri_unescape $url);
 
     if ($url) {
         # do proxy
         my $res = $self->_do_request(
             url     => $url,
-            request => $args{request},
+            request => $c->req->as_http_request,
             user_id => $args{user_id},
         );
         $self->log(debug => '-- response status: ' . $res->code);
@@ -229,25 +210,23 @@ sub _make_response {
             if ($uri->port != 80 && $location->port != $uri->port) {
                 $location->port($uri->port);
             }
-            $res->header( 'Location' => $base_url . '/' . uri_escape( $location ) );
+            $res->header( 'Location' => $base . '/' . uri_escape( $location ) );
             $self->log(debug => "redirect to " . $res->header('Location'));
         } else {
             my $content_type = $res->header('Content-Type');
             $self->log("Content-Type: $content_type");
             if ($content_type =~ /html/i) {
-                $res->content( encode($res->charset, rewrite($base_url, decode($res->charset, $res->content), $url)) );
+                $res->content( encode($res->charset, rewrite($base, decode($res->charset, $res->content), $url)) );
             }
             use bytes;
             $res->header('Content-Length' => bytes::length($res->content));
         }
-        return $res;
+        $c->res->set_http_response($res);
     } else {
         # please input url.
-        my $res = HTTP::Response->new(200, 'about:blank');
-        $res->header('Content-Type' => 'text/html; charset=utf8');
-        my $panel = render_control_panel($base_url, '');
-        $res->content(qq{<html><head></head><body>$panel</body></html>});
-        return $res;
+        $c->res->status(200);
+        $c->res->content_type('text/html; charset=utf8');
+        $c->res->body( render_start_page($base) );
     }
 }
 
@@ -293,9 +272,10 @@ sub _do_request {
         timeout           => $self->conf->{global}->{timeout} || 10,
         max_redirects     => 0,
         protocols_allowed => [qw/http https/],
+        parse_head        => 0,
     );
     my $response = $ua->request($req);
-    for my $hook ( 'response_filter', "response_filter_$carrier" ) {
+    for my $hook ( 'response_filter', "response_filter_$carrier", 'render_location_bar' ) {
         $self->run_hook(
             $hook,
             {
@@ -311,6 +291,8 @@ sub _do_request {
 
 1;
 __END__
+
+=for stopwords nyarla-net
 
 =head1 NAME
 
@@ -328,6 +310,7 @@ Moxy is a mobile web development proxy.
 =head1 THANKS TO
 
 Kazuhiro Osawa
+nyarla-net
 
 =head1 LICENSE
 

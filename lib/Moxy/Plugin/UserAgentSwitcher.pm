@@ -7,14 +7,14 @@ use URI;
 use URI::Escape;
 use CGI;
 
-sub process_agent :Hook('request_filter_process_agent') {
+sub request_filter_process_agent :Hook {
     my ($self, $context, $args) = @_;
 
-    my $user_agent = $context->storage->get('user_agent_' . $args->{user});
+    my $user_agent = $context->storage->get('user_agent_' . $args->{user}) || 'KDDI-TS3G UP.Browser/6.2.0.7.3.129 (GUI) MMP/2.0';
     my $ua_info = $self->get_ua_info($context, $user_agent);
 
     # set UA to request.
-    $args->{request}->header('User-Agent' => $user_agent) if $user_agent and $user_agent ne 'none';
+    $args->{request}->header('User-Agent' => $user_agent);
     while (my ($key, $val) = each %{$ua_info->{header}}) {
         $args->{request}->header($key => $val);
     }
@@ -22,7 +22,7 @@ sub process_agent :Hook('request_filter_process_agent') {
     $context->log(debug => "UserAgent is $user_agent");
 }
 
-sub control_panel :Hook('control_panel') {
+sub control_panel :Hook {
     my ($self, $context, $args) = @_;
 
     # generate control panel html.
@@ -31,7 +31,7 @@ sub control_panel :Hook('control_panel') {
     return $self->render_template(
         $context,
         'panel.tt' => {
-            agents          => $self->ua_list($context),
+            ua_list         => $self->ua_list($context),
             moxy_user_agent => (
                 $args->{response}->request->header('User-Agent') || ''
             ),
@@ -41,7 +41,7 @@ sub control_panel :Hook('control_panel') {
     );
 }
 
-sub request_filter :Hook('request_filter') {
+sub request_filter :Hook {
     my ($self, $context, $args) = @_;
 
     if ($args->{request}->uri =~ m{^http://uaswitcher\.moxy/(.+)}) {
@@ -68,9 +68,9 @@ sub get_ua_info {
 
     $self->{__ua_hash} ||= do {
         my $ua_hash;
-        for my $agents (values %{$self->ua_list($context)}) {
-            for my $ua (@{$agents}) {
-                $ua_hash->{$ua->{agent}} = $ua;
+        for my $carrier_info ( @{ $self->ua_list($context) }) {
+            for my $agent ( @{ $carrier_info->{agents} } ) {
+                $ua_hash->{$agent->{agent}} = $agent;
             }
         }
         $ua_hash;

@@ -2,12 +2,11 @@ package Moxy::Plugin::HTTPHeader;
 use strict;
 use warnings;
 use base qw/Moxy::Plugin/;
-use HTTP::MobileAgent;
 use URI;
 use URI::Escape;
 use CGI;
 
-sub r:Hook('request_filter') {
+sub get_user_id :Hook('request_filter') {
     my ($self, $context, $args) = @_;
 
     my $http_header = $context->storage->get(__PACKAGE__. $args->{user});
@@ -24,7 +23,7 @@ sub r:Hook('request_filter') {
     }
 }
 
-sub c:Hook('control_panel') {
+sub control_panel :Hook {
     my ($self, $context, $args) = @_;
 
     # generate control panel html.
@@ -41,7 +40,7 @@ sub c:Hook('control_panel') {
 }
 
 # set.
-sub x:Hook('request_filter') {
+sub save :Hook('request_filter') {
     my ($self, $context, $args) = @_;
 
     if ($args->{request}->uri =~ m{^http://http-header\.moxy/(.+)}) {

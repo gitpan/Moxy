@@ -4,10 +4,10 @@ use warnings;
 use base qw/Moxy::Plugin/;
 use Moxy::Util;
 use Path::Class;
-use HTML::ReplacePictogramMobileJp;
+use HTML::ReplacePictogramMobileJp 0.04;
 use HTTP::MobileAttribute;
 
-sub response_filter :Hook('response_filter') {
+sub response_filter :Hook {
     my ( $self, $context, $args, ) = @_;
     return unless ( ( $args->{response}->header('Content-Type') || '' ) =~ /html/ );
     return if $args->{mobile_attribute}->is_non_mobile;
@@ -17,6 +17,8 @@ sub response_filter :Hook('response_filter') {
     my $charset = $args->{response}->charset;
     $charset = ( $charset =~ /utf-?8/i ) ? 'utf8' : 'sjis';
 
+    my $pict_html = $self->render_template( $context, 'pict.tmpl' );
+
     $args->{response}->content(
         HTML::ReplacePictogramMobileJp->replace(
             html     => $args->{response}->content,
@@ -25,15 +27,13 @@ sub response_filter :Hook('response_filter') {
             callback => sub {
                 my ( $unicode, $carrier ) = @_;
 
-                my $pict_html =
-                    $self->render_template( $context, 'pict.tmpl' );
                 return sprintf( $pict_html, $carrier, $unicode, $unicode );
             }
         )
     );
 }
 
-sub deliver_pictogram :Hook('request_filter') {
+sub request_filter :Hook {
     my ($self, $context, $args) = @_;
     die "request missing" unless $args->{request};
 

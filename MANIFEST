@@ -1384,6 +1384,7 @@ config.yaml
 config.yaml.sample
 inc/Module/AutoInstall.pm
 inc/Module/Install.pm
+inc/Module/Install/AuthorTests.pm
 inc/Module/Install/AutoInstall.pm
 inc/Module/Install/Base.pm
 inc/Module/Install/Can.pm
@@ -1438,7 +1439,6 @@ moxy.pl
 README
 t/00.load.t
 t/Plugin-Server-rewrite.t
-t/Plugin-Server-rewrite.t.rej
 t/Plugin-Server-xss.t
 t/Plugins/DisableTableTag.t
 t/Plugins/DisplayWidth.t
@@ -1447,7 +1447,8 @@ t/Plugins/GPS-request.t
 t/Plugins/GPS-response.t
 t/Plugins/Pictogram.t
 t/Plugins/RefererCutter.t
-t/pod.t
-t/spelling.t
 t/Storage-DBM_File.t
 TODO
+xt/98_perlcritic.t
+xt/pod.t
+xt/spelling.t

@@ -1380,11 +1380,9 @@ AUTHORS
 bin/moxysetup.sh
 bin/update_ez_model_list.pl
 Changes
-config.yaml
 config.yaml.sample
 inc/Module/AutoInstall.pm
 inc/Module/Install.pm
-inc/Module/Install/AuthorTests.pm
 inc/Module/Install/AutoInstall.pm
 inc/Module/Install/Base.pm
 inc/Module/Install/Can.pm

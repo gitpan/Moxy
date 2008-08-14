@@ -13,7 +13,8 @@ all_from("lib/Moxy.pm");
 }
 
 requires 'Class::Component' => 0.16;
-requires 'HTTP::Engine' => '0.0.11';
+requires 'HTTP::Engine' => '0.0.13';
+requires 'HTTP::Engine::Compat' => '0.0.1';
 requires 'HTTP::MobileAttribute';
 requires 'CGI';
 requires 'FindBin';
@@ -47,7 +48,7 @@ features(
 
 tests 't/*.t t/*/*.t t/*/*/*.t';
 
-author_tests 'xt';
+# author_tests 'xt';
 auto_include;
 auto_install;
 

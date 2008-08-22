@@ -1381,9 +1381,8 @@ bin/moxysetup.sh
 bin/update_ez_model_list.pl
 Changes
 config.yaml.sample
-inc/Module/AutoInstall.pm
 inc/Module/Install.pm
-inc/Module/Install/AutoInstall.pm
+inc/Module/Install/AuthorTests.pm
 inc/Module/Install/Base.pm
 inc/Module/Install/Can.pm
 inc/Module/Install/Fetch.pm
@@ -1393,7 +1392,6 @@ inc/Module/Install/Metadata.pm
 inc/Module/Install/TestBase.pm
 inc/Module/Install/Win32.pm
 inc/Module/Install/WriteAll.pm
-inc/Path/Class.pm
 inc/Spiffy.pm
 inc/Test/Base.pm
 inc/Test/Base/Filter.pm
@@ -1423,13 +1421,16 @@ lib/Moxy/Plugin/Pictogram.pm
 lib/Moxy/Plugin/QRCode.pm
 lib/Moxy/Plugin/RefererCutter.pm
 lib/Moxy/Plugin/RelativeLocation.pm
+lib/Moxy/Plugin/Scrubber.pm
 lib/Moxy/Plugin/ShowHTTPHeaders.pm
+lib/Moxy/Plugin/StripScripts.pm
 lib/Moxy/Plugin/UserAgentSwitcher.pm
 lib/Moxy/Plugin/UserID.pm
 lib/Moxy/Plugin/XMLisHTML.pm
 lib/Moxy/Storage.pm
 lib/Moxy/Storage/DBM_File.pm
 lib/Moxy/Util.pm
+log
 Makefile.PL
 MANIFEST			This list of files
 META.yml
@@ -1445,6 +1446,8 @@ t/Plugins/GPS-request.t
 t/Plugins/GPS-response.t
 t/Plugins/Pictogram.t
 t/Plugins/RefererCutter.t
+t/Plugins/Scrubber.t
+t/Plugins/StripScripts.t
 t/Storage-DBM_File.t
 TODO
 xt/98_perlcritic.t

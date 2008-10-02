@@ -1,6 +1,7 @@
 package Moxy::Cmd;
 use strict;
 use warnings;
+require App::Cmd::Simple;
 use base qw/App::Cmd::Simple/;
 
 use File::Spec::Functions;
@@ -13,7 +14,7 @@ sub opt_spec {
     return (
         [ 'daemonize|d' => "daemonize" ],
         [
-            'config|c' => "path to configuration file",
+            'config|c=s' => "path to configuration file",
             { default => catfile( $FindBin::Bin, 'config.yaml' ) }
         ],
         [ 'help|h' => "display manual" ]
@@ -28,6 +29,8 @@ sub validate_args {
 sub run {
     my ($self, $opt, $args) = @_;
 
+    die "missing configuration file path" unless $opt->{config};
+    print "open configuration file: $opt->{config}\n";
     my $config = YAML::LoadFile( $opt->{config} );
     $config->{global}->{log} ||= { level => 'debug' };
 

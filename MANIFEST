@@ -1453,3 +1453,5 @@ TODO
 xt/98_perlcritic.t
 xt/pod.t
 xt/spelling.t
+assets/plugins/Bookmark/panel.tt
+lib/Moxy/Plugin/Bookmark.pm

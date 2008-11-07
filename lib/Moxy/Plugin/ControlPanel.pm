@@ -11,17 +11,26 @@ sub response_filter: Hook {
 
     $context->log("debug" => "generate ControlPanel");
 
+    my @parts = do {
+        my @r;
+        for my $hook (@{$context->class_component_hooks->{'control_panel'}}) {
+            my ($plugin, $method) = ($hook->{plugin}, $hook->{method});
+            push @r, { title => sub { (my $x = ref $plugin) =~ s/.+:://; $x }->(), body => $plugin->$method($context, $args) };
+        }
+        @r;
+    };
+
     my $output = $self->render_template(
         $context,
         'panelcontainer.tt' => {
-            parts => $context->run_hook('control_panel' => $args), 
+            parts => \@parts, 
         }
     );
 
     # convert html charset to response charset.
     my $charset = $args->{response}->charset;
     my $enc = Encode::find_encoding($charset);
-    Encode::from_to($output, 'utf-8', $enc ? $enc->name : 'utf-8');
+    $output = Encode::encode(($enc ? $enc->name : 'utf-8'), $output);
 
     # insert control panel to html response.
     my $content = $args->{response}->content;

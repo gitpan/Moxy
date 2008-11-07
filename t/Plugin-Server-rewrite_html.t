@@ -4,7 +4,7 @@ use Test::Base;
 use Moxy;
 
 sub _rewrite {
-    Moxy::rewrite('http://localhost:9999/', shift, 'http://relative.example.jp/');
+    Moxy::rewrite_html('http://localhost:9999/', shift, 'http://relative.example.jp/');
 }
 
 sub remove_crlf {
@@ -77,4 +77,10 @@ __END__
 <img src="http://example.com/bar.jpg">
 --- expected
 <html><img src="http://localhost:9999/http%3A%2F%2Fexample.com%2Fbar.jpg" /></html>
+
+=== p img
+--- input
+<p>foo</p>
+--- expected
+<html><p>foo</p></html>
 

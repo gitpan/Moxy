@@ -2,9 +2,10 @@ package Moxy;
 use 5.00800;
 use strict;
 use warnings;
+use base qw/Class::Accessor::Fast/;
 use Class::Component 0.16;
 
-our $VERSION = '0.46';
+our $VERSION = '0.47';
 
 use Carp;
 use Encode;
@@ -25,6 +26,7 @@ use URI::Escape;
 use URI::Heuristic qw(uf_uristr);
 use URI;
 use YAML;
+use Time::HiRes ();
 use HTTP::MobileAttribute plugins => [
     qw/CarrierLetter IS/,
     {
@@ -40,6 +42,7 @@ use HTTP::MobileAttribute plugins => [
 __PACKAGE__->load_components(qw/Plaggerize Autocall::InjectMethod Context/);
 
 __PACKAGE__->load_plugins(qw/DisplayWidth ControlPanel LocationBar Pictogram/);
+__PACKAGE__->mk_accessors(qw/response_time/);
 
 sub new {
     my ($class, $config) = @_;
@@ -89,7 +92,22 @@ sub run_hook_and_get_response {
     return; # not finished yet
 }
 
-sub rewrite {
+sub rewrite_css {
+    my ($base, $css, $url) = @_;
+    my $base_url = URI->new($url);
+
+    $css =~ s{url\(([^\)]+)\)}{
+        my $x = $1;
+        sprintf "url(%s%s%s)",
+            $base,
+            ($base =~ m{/$} ? '' : '/'),
+            uri_escape( URI->new($x)->abs($base_url) )
+    }ge;
+
+    $css;
+}
+
+sub rewrite_html {
     my ($base, $html, $url) = @_;
 
     my $base_url = URI->new($url);
@@ -128,7 +146,7 @@ sub rewrite {
     $replace->( 'link'   => 'href' );
 
     # dump.
-    my $result = $tree->as_HTML(q{<>"&'});
+    my $result = $tree->as_HTML(q{<>"&'}, '', {});
     $tree = $tree->delete; # cleanup :-) HTML::TreeBuilder needs this.
 
     # return result.
@@ -227,7 +245,9 @@ sub _make_response {
             my $content_type = $res->header('Content-Type');
             $self->log(debug => "Content-Type: $content_type");
             if ($content_type =~ /html/i) {
-                $res->content( encode($res->charset, rewrite($base, decode($res->charset, $res->content), $url)) );
+                $res->content( encode($res->charset, rewrite_html($base, decode($res->charset, $res->content), $url), Encode::FB_HTMLCREF) );
+            } elsif ($content_type =~ m{text/css}) {
+                $res->content( encode($res->charset, rewrite_css($base, decode($res->charset, $res->content), $url), Encode::FB_HTMLCREF) );
             }
 
             my $response = HTTP::Engine::Response->new();
@@ -280,6 +300,7 @@ sub _do_request {
             return $response; # finished
         }
     }
+    $req->remove_header('Accept-Encoding'); # I HATE gziped CONTENT
 
     # do request
     my $ua = LWP::UserAgent->new(
@@ -288,8 +309,12 @@ sub _do_request {
         protocols_allowed => [qw/http https/],
         parse_head        => 0,
     );
-    $req->remove_header('Accept-Encoding'); # I HATE gziped CONTENT
+
+    my $t1 = Time::HiRes::gettimeofday();
     my $response = $ua->request($req);
+    my $t2 = Time::HiRes::gettimeofday();
+    $self->response_time( $t2-$t1 );
+
     for my $hook ( 'security_filter', 'response_filter', "response_filter_$carrier", 'render_location_bar' ) {
         $self->run_hook(
             $hook,
@@ -300,6 +325,8 @@ sub _do_request {
             }
         );
     }
+    $self->response_time( -1 ); # clear response time
+
     $response;
 }
 

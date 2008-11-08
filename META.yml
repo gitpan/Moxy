@@ -6,7 +6,7 @@ build_requires:
   Path::Class: 0
   Test::More: 0
 distribution_type: module
-generated_by: Module::Install version 0.68
+generated_by: Module::Install version 0.680
 license: perl
 meta-spec: 
   url: http://module-build.sourceforge.net/META-spec-v1.3.html
@@ -23,24 +23,18 @@ recommends:
 requires: 
   CGI: 0
   Carp: 0
-  Catalyst::Action::RenderView: 0
-  Catalyst::Plugin::ConfigLoader: 0
-  Catalyst::Runtime: 5.7012
   Class::Accessor: 0
-  Class::Component: 0.14
+  Class::Component: 0.16
   Encode::JP::Mobile: 0.22
   FindBin: 0
-  Getopt::Long: 0
-  HTML::ReplacePictogramMobileJp: 0.04
+  HTML::ReplacePictogramMobileJp: 0.05
   HTML::Tree: 3.23
+  HTTP::Engine: 0
   HTTP::MobileAttribute: 0
   HTTP::Proxy: 0
-  Log::Dispatch: 0
   Params::Validate: 0
   Path::Class: 0
-  Pod::Usage: 0
   Template: 0
   UNIVERSAL::require: 0.11
-  YAML: 0
 tests: t/*.t t/*/*.t t/*/*/*.t
 version: 0.32

@@ -5,7 +5,7 @@ use warnings;
 use base qw/Class::Accessor::Fast/;
 use Class::Component 0.16;
 
-our $VERSION = '0.49';
+our $VERSION = '0.50';
 
 use Carp;
 use Encode;
@@ -185,7 +185,7 @@ sub handle_request {
     }->();
     my $store = sub {
         my $klass = "HTTP::Session::Store::$conf->{store}->{module}";
-        Class::MOP::load_class($klass);
+        $klass->require or die $@;
         $klass->new( $conf->{store}->{config} );
     }->();
 
@@ -247,8 +247,22 @@ sub _make_response {
             my $location = URI->new($res->header('Location'));
             $self->log(debug => "redirect to $location");
             my $uri = URI->new($url);
-            if ($uri->port != 80 && $location->port != $uri->port) {
+            if ($location->isa('URI::_generic')) {
+                # path only redirect is invalid!
+                #   e.g.   Location: /foo/
+                $self->log(error => "----------------------------");
+                $self->log(error => "INVALID REDIRECT!! $location");
+                $self->log(error => "----------------------------");
+                $location = URI->new( $location->as_string, $uri->scheme );
+                $location->scheme($uri->scheme);
+                $location->host($uri->host);
                 $location->port($uri->port);
+                $self->log(error => "FIXED TO: $location");
+                $self->log(error => "----------------------------");
+            } else {
+                if ($uri->port != 80 && $location->port != $uri->port) {
+                    $location->port($uri->port);
+                }
             }
             my $redirect = $base . '/' . uri_escape($location);
             $self->log(debug => "redirect to $redirect");
@@ -294,7 +308,13 @@ sub _do_request {
     # make request
     my $req = $args{request}->clone;
     $req->uri($args{url});
-    $req->header('Host' => URI->new($args{url})->host);
+    $req->header('Host' => do {
+            my $u = URI->new($args{url});
+            my $header = $u->host;
+            $header .= ':' . $u->port if $u->port != 80;
+            $header;
+        }
+    );
 
     $self->run_hook(
         'request_filter_process_agent',

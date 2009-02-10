@@ -11,11 +11,15 @@ sub get_user_id :Hook('request_filter') {
     my $key = join(',', __PACKAGE__, $args->{mobile_attribute}->user_agent);
     my $user_id = $args->{session}->get($key);
     if ($user_id) {
-        # au subscriber id.
         if ($args->{mobile_attribute}->is_ezweb) {
+            # au subscriber id.
             $args->{request}->header('X-Up-Subno' => $user_id);
         } elsif ($args->{mobile_attribute}->is_docomo && $args->{request}->uri =~ /guid=ON/i) {
+            # docomo
             $args->{request}->header('X-DCMGUID' => $user_id);
+        } elsif ($args->{mobile_attribute}->is_softbank) {
+            # softbank
+            $args->{request}->header('X-JPHONE-UID' => $user_id);
         }
     }
 }
@@ -33,6 +37,14 @@ sub save_user_id :Hook('request_filter') {
         my $key = join(',', __PACKAGE__, $args->{mobile_attribute}->user_agent);
         $args->{session}->set($key => $r->param('user_id'));
 
+        # save history
+        do {
+            my $key = join(',', __PACKAGE__, $args->{mobile_attribute}->user_agent, 'history');
+            my $history = $args->{session}->get($key) || [];
+            unshift @$history, $r->param('user_id');
+            $args->{session}->set($key => $history);
+        };
+
         my $response = HTTP::Response->new( 302, 'Moxy(UserID)' );
         $response->header(Location => $back);
         $response;
@@ -41,10 +53,11 @@ sub save_user_id :Hook('request_filter') {
 
 sub control_panel :Hook {
     my ($self, $context, $args) = @_;
-    return '' unless $args->{mobile_attribute}->is_ezweb || $args->{mobile_attribute}->is_docomo;
+    return '' unless $args->{mobile_attribute}->is_ezweb || $args->{mobile_attribute}->is_docomo || $args->{mobile_attribute}->is_softbank;
 
     my $key = join(',', __PACKAGE__, $args->{mobile_attribute}->user_agent);
     my $user_id = $args->{session}->get($key);
+    my $history = $args->{session}->get(join(',', __PACKAGE__, $args->{mobile_attribute}->user_agent, 'history'));
 
     return $self->render_template(
         $context,
@@ -52,6 +65,7 @@ sub control_panel :Hook {
             user_id          => $user_id,
             referer          => $args->{response}->request->uri,
             mobile_attribute => $args->{mobile_attribute},
+            history          => $history,
         }
     );
 }

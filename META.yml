@@ -1,46 +1,43 @@
---- 
-abstract: Mobile web development proxy
-author: 
-  - Kan Fushihara
-build_requires: 
-  Path::Class: 0
+---
+abstract: 'Mobile web development proxy'
+author:
+  - 'Kan Fushihara'
+build_requires:
   Test::More: 0
 distribution_type: module
-generated_by: Module::Install version 0.68
+generated_by: 'Module::Install version 0.79'
 license: perl
-meta-spec: 
-  url: http://module-build.sourceforge.net/META-spec-v1.3.html
-  version: 1.3
+meta-spec:
+  url: http://module-build.sourceforge.net/META-spec-v1.4.html
+  version: 1.4
 name: Moxy
-no_index: 
-  directory: 
+no_index:
+  directory:
     - inc
     - t
-recommends: 
+recommends:
   Encode::Detect: 1
-  Test::Pod: 0
-  Test::Pod::Coverage: 0
-requires: 
-  CGI: 0
-  Carp: 0
-  Catalyst::Action::RenderView: 0
-  Catalyst::Plugin::ConfigLoader: 0
-  Catalyst::Runtime: 5.7012
+  HTML::Scrubber: 1.04
+  HTML::StripScripts: 1.04
+  HTML::StripScripts::Parser: 1.02
+requires:
+  App::Cmd: 0.2
   Class::Accessor: 0
-  Class::Component: 0.14
-  Encode::JP::Mobile: 0.22
-  FindBin: 0
-  Getopt::Long: 0
-  HTML::ReplacePictogramMobileJp: 0.04
+  Class::Component: 0.17
+  Encode::JP::Mobile: 0.25
+  Filter::Util::Call: 0
+  HTML::ReplacePictogramMobileJp: 0.06
   HTML::Tree: 3.23
+  HTML::TreeBuilder::XPath: 0.09
+  HTTP::Cookies: 0
+  HTTP::Engine: 0.1.4
   HTTP::MobileAttribute: 0
-  HTTP::Proxy: 0
-  Log::Dispatch: 0
-  Params::Validate: 0
+  HTTP::Session: 0.29
+  Params::Validate: 0.91
   Path::Class: 0
-  Pod::Usage: 0
-  Template: 0
+  Template: 2.19
   UNIVERSAL::require: 0.11
-  YAML: 0
-tests: t/*.t t/*/*.t t/*/*/*.t
-version: 0.32
+  perl: 5.8.0
+resources:
+  license: http://dev.perl.org/licenses/
+version: 0.51

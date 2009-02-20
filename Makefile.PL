@@ -18,21 +18,17 @@ requires 'Encode::JP::Mobile'             => 0.25;
 requires 'HTML::ReplacePictogramMobileJp' => 0.06;
 requires 'HTML::Tree'                     => 3.23;
 requires 'HTML::TreeBuilder::XPath'       => 0.09;
-requires 'HTTP::Engine'                   => '0.1.2';
+requires 'HTTP::Engine'                   => '0.1.4';
 requires 'Params::Validate'               => 0.91;
 requires 'Template'                       => 2.19;
 requires 'UNIVERSAL::require'             => '0.11';
-requires 'CGI';
-requires 'Carp';
 requires 'Class::Accessor';
-requires 'FindBin';
 requires 'HTTP::MobileAttribute';
 requires 'Path::Class';
 requires 'HTTP::Session' => 0.29;
 requires 'HTTP::Cookies'; # part of LWP
 
 test_requires('Test::More');
-test_requires('Path::Class');
 
 features(
     'Better Encoding detection' => [

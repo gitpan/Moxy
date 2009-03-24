@@ -5,7 +5,7 @@ author:
 build_requires:
   Test::More: 0
 distribution_type: module
-generated_by: 'Module::Install version 0.79'
+generated_by: 'Module::Install version 0.8'
 license: perl
 meta-spec:
   url: http://module-build.sourceforge.net/META-spec-v1.4.html
@@ -31,7 +31,7 @@ requires:
   HTML::TreeBuilder::XPath: 0.09
   HTTP::Cookies: 0
   HTTP::Engine: 0.1.4
-  HTTP::MobileAttribute: 0
+  HTTP::MobileAttribute: 0.13
   HTTP::Session: 0.29
   Params::Validate: 0.91
   Path::Class: 0
@@ -40,4 +40,4 @@ requires:
   perl: 5.8.0
 resources:
   license: http://dev.perl.org/licenses/
-version: 0.51
+version: 0.52

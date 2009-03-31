@@ -5,7 +5,7 @@ use warnings;
 use base qw/Class::Accessor::Fast/;
 use Class::Component 0.16;
 
-our $VERSION = '0.52';
+our $VERSION = '0.53';
 
 use Carp;
 use Encode;
@@ -168,6 +168,8 @@ sub render_start_page {
 sub handle_request {
     my ($self, $req) = @_;
 
+    $self->log(debug => "---------------------------");
+
     my $conf = $self->conf->{global}->{session};
     my $state_type = $conf->{state}->{module} || 'BasicAuth';
     my $state = sub {
@@ -323,9 +325,15 @@ sub _do_request {
             session => $args{session},
         }
     );
+
     my $mobile_attribute = HTTP::MobileAttribute->new($req->headers);
     my $carrier = $mobile_attribute->carrier;
-    for my $hook ('request_filter', "request_filter_$carrier") {
+    my $cookie_jar = $args{session}->get('cookies') || HTTP::Cookies->new(); # load cookies
+    if ($mobile_attribute->is_docomo) {
+        undef $cookie_jar; # docomo phone doesn't support cookies
+    }
+
+    for my $hook ('url_handle', "url_handle_$carrier") {
         my $response = $self->run_hook_and_get_response(
             $hook,
             +{
@@ -338,13 +346,6 @@ sub _do_request {
             return $response; # finished
         }
     }
-    $req->remove_header('Accept-Encoding'); # I HATE gziped CONTENT
-    $req->remove_header('Cookie');          # remove Cookie from the client
-
-    my $cookie_jar = $args{session}->get('cookies') || HTTP::Cookies->new(); # load cookies
-    if ($mobile_attribute->is_docomo) {
-        undef $cookie_jar; # docomo phone doesn't support cookies
-    }
 
     # do request
     my $ua = LWP::UserAgent->new(
@@ -354,11 +355,43 @@ sub _do_request {
         parse_head        => 0,
         cookie_jar        => $cookie_jar,
     );
+    $ua->add_handler( request_prepare => sub {
+        my ($req, $ua, $h) = @_;
 
+        for my $hook ('request_filter', "request_filter_$carrier") {
+            my $response = $self->run_hook_and_get_response(
+                $hook,
+                +{
+                    request          => $req,              # HTTP::Request object
+                    mobile_attribute => $mobile_attribute,
+                    session          => $args{session},
+                }
+            );
+            if ($response) {
+                return $response; # finished
+            }
+        }
+        $req->remove_header('Accept-Encoding'); # I HATE gziped CONTENT
+        $req->remove_header('Cookie');          # remove Cookie from the client
+
+        $req;
+    });
+    $ua->add_handler( response_done => sub {
+        my ($response, $ua, $h) = @_;
+        my $location = $response->header('Location');
+        if ($location) {
+            my $content = $response->content || '';
+            $self->log(info => "redirect to '$location', $content");
+        }
+        $response;
+    });
+
+    $self->log(debug => "request to @{[ $req->uri ]}");
     my $t1 = Time::HiRes::gettimeofday();
     my $response = $ua->request($req);
     my $t2 = Time::HiRes::gettimeofday();
     $self->response_time( $t2-$t1 );
+    $self->log(debug => "and, request was @{[ $response->request->uri ]}");
 
     $args{session}->set('cookies' => $cookie_jar); # save cookies
 

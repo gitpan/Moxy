@@ -5,7 +5,7 @@ package Test::Base;
 use 5.006001;
 use Spiffy 0.30 -Base;
 use Spiffy ':XXX';
-our $VERSION = '0.55';
+our $VERSION = '0.56';
 
 my @test_more_exports;
 BEGIN {
@@ -29,6 +29,7 @@ our @EXPORT = (@test_more_exports, qw(
     delimiters spec_file spec_string 
     filters filters_delay filter_arguments
     run run_compare run_is run_is_deeply run_like run_unlike 
+    skip_all_unless_require is_deep run_is_deep
     WWW XXX YYY ZZZ
     tie_output no_diag_on_only
 
@@ -370,6 +371,34 @@ sub run_unlike() {
     }
 }
 
+sub skip_all_unless_require() {
+    (my ($self), @_) = find_my_self(@_);
+    my $module = shift;
+    eval "require $module; 1"
+        or Test::More::plan(
+            skip_all => "$module failed to load"
+        );
+}
+
+sub is_deep() {
+    (my ($self), @_) = find_my_self(@_);
+    require Test::Deep;
+    Test::Deep::cmp_deeply(@_);
+}
+
+sub run_is_deep() {
+    (my ($self), @_) = find_my_self(@_);
+    $self->_assert_plan;
+    my ($x, $y) = $self->_section_names(@_);
+    for my $block (@{$self->block_list}) {
+        next unless exists($block->{$x}) and exists($block->{$y});
+        $block->run_filters unless $block->is_filtered;
+        is_deep($block->$x, $block->$y, 
+           $block->name ? $block->name : ()
+          );
+    }
+}
+
 sub _pre_eval {
     my $spec = shift;
     return $spec unless $spec =~
@@ -650,4 +679,4 @@ __DATA__
 
 =encoding utf8
 
-#line 1330
+#line 1374

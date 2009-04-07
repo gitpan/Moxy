@@ -5,7 +5,7 @@ use warnings;
 use base qw/Class::Accessor::Fast/;
 use Class::Component 0.16;
 
-our $VERSION = '0.53';
+our $VERSION = '0.54';
 
 use Carp;
 use Encode;
@@ -43,7 +43,10 @@ use HTTP::MobileAttribute plugins => [
 
 __PACKAGE__->load_components(qw/Plaggerize Autocall::InjectMethod Context/);
 
-__PACKAGE__->load_plugins(qw/DisplayWidth ControlPanel LocationBar Pictogram/);
+__PACKAGE__->load_plugins(qw/
+    DisplayWidth ControlPanel LocationBar Pictogram
+    BasicAuth InternalServerError
+/);
 __PACKAGE__->mk_accessors(qw/response_time/);
 
 sub new {
@@ -215,6 +218,8 @@ sub handle_request {
             session => $session,
         );
         $session->response_filter($res);
+        $session->finalize;
+
         return $res;
     }
 }
@@ -395,7 +400,7 @@ sub _do_request {
 
     $args{session}->set('cookies' => $cookie_jar); # save cookies
 
-    for my $hook ( 'security_filter', 'response_filter', "response_filter_$carrier", 'render_location_bar' ) {
+    for my $hook ( 'status_handler', 'security_filter', 'response_filter', "response_filter_$carrier", 'render_location_bar' ) {
         $self->run_hook(
             $hook,
             {

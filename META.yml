@@ -43,4 +43,4 @@ requires:
 resources:
   license: http://dev.perl.org/licenses/
   repository: http://svn.coderepos.org/share/lang/perl/Moxy/trunk
-version: 0.53
+version: 0.54

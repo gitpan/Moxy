@@ -5,7 +5,7 @@ use warnings;
 use base qw/Class::Accessor::Fast/;
 use Class::Component 0.16;
 
-our $VERSION = '0.55';
+our $VERSION = '0.56';
 
 use Carp;
 use Encode;
@@ -45,7 +45,7 @@ __PACKAGE__->load_components(qw/Plaggerize Autocall::InjectMethod Context/);
 
 __PACKAGE__->load_plugins(qw/
     DisplayWidth ControlPanel LocationBar Pictogram
-    BasicAuth InternalServerError
+    Status::401 Status::500 Status::404
     UserID XMLisHTML UserAgentSwitcher RefererCutter CookieCutter FlashUseImgTag
     DisableTableTag GPS HTTPHeader QRCode ShowHTTPHeaders
 /);

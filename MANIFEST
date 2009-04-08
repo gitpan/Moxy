@@ -1407,7 +1407,6 @@ lib/Moxy/Attribute/CarrierHook.pm
 lib/Moxy/Component/Context.pm
 lib/Moxy/Manual/HackingJA.pod
 lib/Moxy/Plugin.pm
-lib/Moxy/Plugin/BasicAuth.pm
 lib/Moxy/Plugin/Bookmark.pm
 lib/Moxy/Plugin/ControlPanel.pm
 lib/Moxy/Plugin/CookieCutter.pm
@@ -1421,7 +1420,6 @@ lib/Moxy/Plugin/GPS/EZweb.pm
 lib/Moxy/Plugin/GPS/ThirdForce.pm
 lib/Moxy/Plugin/Hosts.pm
 lib/Moxy/Plugin/HTTPHeader.pm
-lib/Moxy/Plugin/InternalServerError.pm
 lib/Moxy/Plugin/LocationBar.pm
 lib/Moxy/Plugin/Pictogram.pm
 lib/Moxy/Plugin/QRCode.pm
@@ -1431,6 +1429,9 @@ lib/Moxy/Plugin/ResponseTime.pm
 lib/Moxy/Plugin/Scrubber.pm
 lib/Moxy/Plugin/ShowHTMLSource.pm
 lib/Moxy/Plugin/ShowHTTPHeaders.pm
+lib/Moxy/Plugin/Status/401.pm
+lib/Moxy/Plugin/Status/404.pm
+lib/Moxy/Plugin/Status/500.pm
 lib/Moxy/Plugin/StripScripts.pm
 lib/Moxy/Plugin/UserAgentSwitcher.pm
 lib/Moxy/Plugin/UserID.pm
@@ -1445,16 +1446,16 @@ README
 t/00.load.t
 t/Plugin-Server-rewrite_css.t
 t/Plugin-Server-rewrite_html.t
-t/Plugins/BasicAuth.t
 t/Plugins/DisableTableTag.t
 t/Plugins/DisplayWidth.t
 t/Plugins/FlashUseImgTag.t
 t/Plugins/GPS-request.t
 t/Plugins/GPS-response.t
-t/Plugins/InternalServerError.t
 t/Plugins/Pictogram.t
 t/Plugins/RefererCutter.t
 t/Plugins/Scrubber.t
+t/Plugins/Status/401.t
+t/Plugins/Status/500.t
 t/Plugins/StripScripts.t
 t/Plugins/UserAgentSwitcher.t
 t/Session-State-BasicAuth.t

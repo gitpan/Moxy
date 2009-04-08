@@ -5,7 +5,7 @@ use warnings;
 use base qw/Class::Accessor::Fast/;
 use Class::Component 0.16;
 
-our $VERSION = '0.54';
+our $VERSION = '0.55';
 
 use Carp;
 use Encode;
@@ -46,6 +46,8 @@ __PACKAGE__->load_components(qw/Plaggerize Autocall::InjectMethod Context/);
 __PACKAGE__->load_plugins(qw/
     DisplayWidth ControlPanel LocationBar Pictogram
     BasicAuth InternalServerError
+    UserID XMLisHTML UserAgentSwitcher RefererCutter CookieCutter FlashUseImgTag
+    DisableTableTag GPS HTTPHeader QRCode ShowHTTPHeaders
 /);
 __PACKAGE__->mk_accessors(qw/response_time/);
 
@@ -141,31 +143,6 @@ sub rewrite_html {
 
     # return result.
     return $result;
-}
-
-sub render_start_page {
-    my $base = shift;
-
-    return sprintf(<<"...");
-<?xml version="1.0" encoding="utf-8"?>
-<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
-<html lang="ja" xml:lang="ja" xmlns="http://www.w3.org/1999/xhtml">
-<head>
-    <meta http-equiv="content-script-type" content="text/javascript" />
-    <script type="text/javascript">
-        window.onload = function () {
-            document.getElementById('moxy_url').focus();
-        };
-    </script>
-</head>
-<body>
-    <form method="get" action="$base" onsubmit="location.href=location.href+encodeURIComponent(document.getElementById('moxy_url').value);return false;">
-        <input type="text" size="40" id="moxy_url" />
-        <input type="submit" value="go" />
-    </form>
-</body>
-</html>
-...
 }
 
 sub handle_request {
@@ -295,11 +272,33 @@ sub _make_response {
         }
     } else {
         # please input url.
-        return HTTP::Engine::Response->new(
-            status       => 200,
-            content_type => 'text/html; charset=utf8',
-            body         => render_start_page($base),
+        my $response = HTTP::Response->new(
+            200 => 'ok', HTTP::Headers->new(
+                'content-type' => 'text/html;charset=utf-8',
+            ), q{<?xml version="1.0" encoding="utf-8"?>
+                <!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+                <html lang="ja" xml:lang="ja" xmlns="http://www.w3.org/1999/xhtml">
+                <head>
+                    <title>moxy start page</title>
+                </head>
+                <body>
+                <div>
+                <h1>moxy start page</h1>
+                <p>please input url to location bar</p>
+                </div>
+                </body>
+            </html>},
         );
+        $response->content( encode($response->charset, rewrite_html($base, decode($response->charset, $response->content), $url), Encode::FB_HTMLCREF) );
+        $response->request($req->as_http_request);
+        $self->_post_process(
+            response         => $response,
+            mobile_attribute => HTTP::MobileAttribute->new('KDDI-KC26 UP.Browser/6.2.0.7.3.129 (GUI) MMP/2.0'),
+            session          => $args{session},
+        );
+        my $res = HTTP::Engine::Response->new;
+        $res->set_http_response($response);
+        $res;
     }
 }
 
@@ -400,21 +399,36 @@ sub _do_request {
 
     $args{session}->set('cookies' => $cookie_jar); # save cookies
 
-    for my $hook ( 'status_handler', 'security_filter', 'response_filter', "response_filter_$carrier", 'render_location_bar' ) {
-        $self->run_hook(
-            $hook,
-            {
-                response         => $response,           # HTTP::Response object
-                mobile_attribute => $mobile_attribute,
-                session          => $args{session},
-            }
-        );
-    }
+    $self->_post_process(
+        response         => $response,
+        mobile_attribute => $mobile_attribute,
+        session          => $args{session},
+    );
     $self->response_time( -1 ); # clear response time
 
     $response;
 }
 
+sub _post_process {
+    my $self = shift;
+    my %args = validate(
+        @_ => {
+            response         => 1,
+            mobile_attribute => 1,
+            session          => 1,
+        },
+    );
+
+    my $carrier = $args{mobile_attribute}->carrier;
+    for my $hook (
+        'status_handler',  'security_filter',
+        'response_filter', "response_filter_$carrier",
+        'render_location_bar'
+      )
+    {
+        $self->run_hook( $hook, \%args );
+    }
+}
 
 1;
 __END__

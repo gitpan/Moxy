@@ -1,5 +1,4 @@
 .gitignore
-.shipit
 assets/common/docomo-display-map.yaml
 assets/plugins/Bookmark/panel.tt
 assets/plugins/ControlPanel/panelcontainer.tt
@@ -1384,7 +1383,6 @@ AUTHORS
 bin/moxysetup.sh
 bin/update_ez_model_list.pl
 Changes
-config.yaml.sample
 inc/Module/Install.pm
 inc/Module/Install/AuthorTests.pm
 inc/Module/Install/Base.pm
@@ -1406,7 +1404,6 @@ inc/Test/Builder/Module.pm
 inc/Test/More.pm
 lib/Moxy.pm
 lib/Moxy/Attribute/CarrierHook.pm
-lib/Moxy/Cmd.pm
 lib/Moxy/Component/Context.pm
 lib/Moxy/Manual/HackingJA.pod
 lib/Moxy/Plugin.pm
@@ -1448,7 +1445,6 @@ README
 t/00.load.t
 t/Plugin-Server-rewrite_css.t
 t/Plugin-Server-rewrite_html.t
-t/Plugin-Server-xss.t
 t/Plugins/BasicAuth.t
 t/Plugins/DisableTableTag.t
 t/Plugins/DisplayWidth.t

@@ -12,7 +12,6 @@ all_from("lib/Moxy.pm");
         \&recommends;
 }
 
-requires 'App::Cmd'                       => 0.200;
 requires 'Class::Component'               => 0.17;
 requires 'Encode::JP::Mobile'             => 0.25;
 requires 'HTML::ReplacePictogramMobileJp' => 0.06;
@@ -23,6 +22,7 @@ requires 'Params::Validate'               => 0.91;
 requires 'Template'                       => 2.19;
 requires 'UNIVERSAL::require'             => '0.11';
 requires 'Class::Accessor';
+requires 'Hash::Merge';
 requires 'HTTP::MobileAttribute' => 0.13;
 requires 'Path::Class';
 requires 'HTTP::Session' => 0.29;

@@ -23,7 +23,6 @@ recommends:
   HTML::StripScripts: 1.04
   HTML::StripScripts::Parser: 1.02
 requires:
-  App::Cmd: 0.2
   Class::Accessor: 0
   Class::Component: 0.17
   Encode::JP::Mobile: 0.25
@@ -35,6 +34,7 @@ requires:
   HTTP::Engine: 0.1.4
   HTTP::MobileAttribute: 0.13
   HTTP::Session: 0.29
+  Hash::Merge: 0
   Params::Validate: 0.91
   Path::Class: 0
   Template: 2.19
@@ -43,4 +43,4 @@ requires:
 resources:
   license: http://dev.perl.org/licenses/
   repository: http://svn.coderepos.org/share/lang/perl/Moxy/trunk
-version: 0.54
+version: 0.55

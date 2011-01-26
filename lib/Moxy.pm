@@ -5,11 +5,12 @@ use warnings;
 use base qw/Class::Accessor::Fast/;
 use Class::Component 0.16;
 
-our $VERSION = '0.56';
+our $VERSION = '0.60';
 
 use Carp;
 use Encode;
 use File::Spec::Functions;
+use File::Basename;
 use FindBin;
 use HTML::Entities;
 use HTML::Parser;
@@ -29,6 +30,9 @@ use URI::Heuristic qw(uf_uristr);
 use URI;
 use YAML;
 use Time::HiRes ();
+use Plack::Response;
+use Moxy::Request;
+use HTTP::Message::PSGI;
 use HTTP::MobileAttribute plugins => [
     qw/CarrierLetter IS/,
     {
@@ -54,20 +58,52 @@ __PACKAGE__->mk_accessors(qw/response_time/);
 sub new {
     my ($class, $config) = @_;
 
+    if ( $config->{global}->{plugins} ) {
+        $class->load_plugins(@{ $config->{global}->{plugins} });
+    }
+
+    $config->{global}->{log}->{level} ||= 'info';
+
+    $config->{global}->{assets_path} ||= do {
+        my $libpath = $INC{'Moxy.pm'};
+        $libpath =~ s!(?:blib/)?lib/+Moxy\.pm$!!;
+        $libpath ||= './';
+        $libpath = File::Spec->rel2abs($libpath);
+        File::Spec->catdir($libpath, 'assets');
+    };
+
     my $self = $class->NEXT( 'new' => { config => $config } );
+
+    $self->conf->{global}->{session}->{store} = +{
+        module => 'DBM',
+        config => {
+            file => do {
+                require File::Temp;
+                my $db = File::Temp->new();
+                $self->{__session} = $db;
+                "$db", # we need stringify for file::temp
+            },
+            dbm_class => 'NDBM_File',
+        },
+    };
 
     $self->conf->{global}->{log}->{fh} ||= \*STDERR;
 
     return $self;
 }
 
-sub assets_path {
-    my $self = shift;
+sub assets_path { shift->conf->{global}->{assets_path} }
 
-    return $self->{__assets_path} ||= do {
-        $self->conf->{global}->{assets_path}
-            || dir( $FindBin::RealBin, 'assets' )->stringify;
-    };
+sub res {
+    Plack::Response->new(@_);
+}
+sub HTTP::Response::to_plack_response {
+    my $self = shift;
+    return res(
+        $self->code,
+        $self->headers,
+        $self->content,
+    );
 }
 
 # -------------------------------------------------------------------------
@@ -120,12 +156,23 @@ sub rewrite_html {
 
         for my $node ( $tree->findnodes("//$tag") ) {
             if ( my $attr = $node->attr($attr_name) ) {
-                $node->attr(
-                    $attr_name => sprintf( qq{%s%s%s},
-                        $base,
-                        ($base =~ m{/$} ? '' : '/'),
-                        uri_escape( URI->new($attr)->abs($base_url) ) )
-                );
+                next if $attr =~ /^mailto:/;
+                if ($attr =~ /^tel:([0-9-]+)$/) {
+                    my $tel = $1;
+                    $node->attr(
+                        'onclick' => qq{prompt('tel', '$1');return false;}
+                    );
+                } else {
+                    # maybe /https?/
+                    my $target_url = URI->new($attr);
+                       $target_url = $target_url->abs($base_url) if $base_url;
+                    $node->attr(
+                        $attr_name => sprintf( qq{%s%s%s},
+                            $base,
+                            ($base =~ m{/$} ? '' : '/'),
+                            uri_escape( $target_url ) )
+                    );
+                }
             }
         }
     };
@@ -143,6 +190,17 @@ sub rewrite_html {
 
     # return result.
     return $result;
+}
+
+sub to_app {
+    my ($self) = @_;
+    sub {
+        my $env = shift;
+        my $req = Moxy::Request->new($env);
+        my $res = $self->handle_request($req);
+           $res->content_length( length($res->content) ); # adjust content-length.
+           $res->finalize();
+    };
 }
 
 sub handle_request {
@@ -175,12 +233,12 @@ sub handle_request {
     my $auth = join(',', $req->headers->authorization_basic);
     if ($state->isa('Moxy::Session::State::BasicAuth') && !$auth) {
         $self->log(debug => 'basicauth');
-        return HTTP::Engine::Response->new(
-            status => 401,
-            headers => {
+        return res(
+            401,
+            [
                 WWW_Authenticate => qq{Basic realm="Moxy needs basic auth.Only for identification.Password is dummy."},
-            },
-            body => 'authentication required',
+            ],
+            'authentication required',
         );
     } else {
         $self->log(debug => "session: state: $state, store: $store");
@@ -205,7 +263,7 @@ sub _make_response {
     my $self = shift;
     my %args = validate(
         @_ => +{
-            req     => { isa => 'HTTP::Engine::Request', },
+            req     => { isa => 'Moxy::Request', },
             session => { type => OBJECT },
         }
     );
@@ -216,7 +274,7 @@ sub _make_response {
     $base->query_form({});
 
     (my $url = $req->uri->path_query) =~ s!^/!!;
-    $url = uf_uristr(uri_unescape $url);
+    $url = uf_uristr(uri_unescape($url));
 
     if ($url) {
         # do proxy
@@ -251,11 +309,10 @@ sub _make_response {
             }
             my $redirect = $base . '/' . uri_escape($location);
             $self->log(debug => "redirect to $redirect");
-            return HTTP::Engine::Response->new(
-                status  => 302,
-                headers => {
+            return res(
+                302, [
                     Location => $redirect,
-                },
+                ],
             );
         } else {
             my $content_type = $res->header('Content-Type');
@@ -266,9 +323,7 @@ sub _make_response {
                 $res->content( encode($res->charset, rewrite_css($base, decode($res->charset, $res->content), $url), Encode::FB_HTMLCREF) );
             }
 
-            my $response = HTTP::Engine::Response->new();
-            $response->set_http_response($res);
-            return $response;
+            return $res->to_plack_response();
         }
     } else {
         # please input url.
@@ -289,16 +344,14 @@ sub _make_response {
                 </body>
             </html>},
         );
-        $response->content( encode($response->charset, rewrite_html($base, decode($response->charset, $response->content), $url), Encode::FB_HTMLCREF) );
         $response->request($req->as_http_request);
         $self->_post_process(
             response         => $response,
             mobile_attribute => HTTP::MobileAttribute->new('KDDI-KC26 UP.Browser/6.2.0.7.3.129 (GUI) MMP/2.0'),
             session          => $args{session},
         );
-        my $res = HTTP::Engine::Response->new;
-        $res->set_http_response($response);
-        $res;
+        $response->content( encode($response->charset, rewrite_html($base, decode($response->charset, $response->content), ''), Encode::FB_HTMLCREF) );
+        return $response->to_plack_response();
     }
 }
 

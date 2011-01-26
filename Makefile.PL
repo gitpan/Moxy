@@ -12,23 +12,25 @@ all_from("lib/Moxy.pm");
         \&recommends;
 }
 
+requires 'Plack'                          => '0.9032';
+requires 'Plack::Middleware::ReverseProxy' => '0.05';
 requires 'Class::Component'               => 0.17;
 requires 'Encode::JP::Mobile'             => 0.25;
 requires 'HTML::ReplacePictogramMobileJp' => 0.06;
 requires 'HTML::Tree'                     => 3.23;
 requires 'HTML::TreeBuilder::XPath'       => 0.09;
-requires 'HTTP::Engine'                   => '0.1.4';
 requires 'Params::Validate'               => 0.91;
 requires 'Template'                       => 2.19;
 requires 'UNIVERSAL::require'             => '0.11';
 requires 'Class::Accessor';
-requires 'Hash::Merge';
 requires 'HTTP::MobileAttribute' => 0.13;
 requires 'Path::Class';
-requires 'HTTP::Session' => 0.29;
+requires 'HTTP::Session' => 0.41;
 requires 'HTTP::Cookies'; # part of LWP
+requires 'Test::More' => 0.96;
 
 test_requires('Test::More');
+test_requires('Test::Requires');
 
 features(
     'Better Encoding detection' => [
@@ -54,6 +56,7 @@ if (eval "use Module::Install::AuthorTests;1;") {
 
 use_test_base;
 auto_set_repository();
+auto_install;
 install_script glob('script/*.pl');
 WriteAll;
 

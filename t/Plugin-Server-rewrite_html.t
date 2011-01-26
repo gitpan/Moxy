@@ -4,7 +4,7 @@ use Test::Base;
 use Moxy;
 
 sub _rewrite {
-    Moxy::rewrite_html('http://localhost:9999/', shift, 'http://relative.example.jp/');
+    Moxy::rewrite_html('http://localhost:9999/', shift, 'http://relative.example.jp/path/to?foo=bar&bar=baz#foobar');
 }
 
 sub remove_crlf {
@@ -83,4 +83,16 @@ __END__
 <p>foo</p>
 --- expected
 <html><p>foo</p></html>
+
+=== mailto
+--- input
+<a href="mailto:foo@example.com" title="foo">bar</a>
+--- expected
+<html><a href="mailto:foo@example.com" title="foo">bar</a></html>
+
+=== tel:
+--- input
+<a href="tel:09044444444" title="foo">bar</a>
+--- expected
+<html><a href="tel:09044444444" onclick="prompt(&#39;tel&#39;, &#39;09044444444&#39;);return false;" title="foo">bar</a></html>
 

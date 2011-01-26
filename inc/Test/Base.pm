@@ -5,7 +5,7 @@ package Test::Base;
 use 5.006001;
 use Spiffy 0.30 -Base;
 use Spiffy ':XXX';
-our $VERSION = '0.56';
+our $VERSION = '0.59';
 
 my @test_more_exports;
 BEGIN {
@@ -614,11 +614,13 @@ sub run_filters {
             my $function = "main::$filter";
             no strict 'refs';
             if (defined &$function) {
-                local $_ = join '', @value;
+                local $_ =
+                    (@value == 1 and not defined($value[0])) ? undef :
+                        join '', @value;
                 my $old = $_;
                 @value = &$function(@value);
                 if (not(@value) or 
-                    @value == 1 and $value[0] =~ /\A(\d+|)\z/
+                    @value == 1 and defined($value[0]) and $value[0] =~ /\A(\d+|)\z/
                 ) {
                     if ($value[0] && $_ eq $old) {
                         Test::Base::diag("Filters returning numbers are supposed to do munging \$_: your filter '$function' apparently doesn't.");
@@ -679,4 +681,4 @@ __DATA__
 
 =encoding utf8
 
-#line 1374
+#line 1376

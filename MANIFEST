@@ -1381,10 +1381,13 @@ assets/plugins/UserAgentSwitcher/useragent.yaml
 assets/plugins/UserID/panel.tt
 AUTHORS
 bin/moxysetup.sh
+bin/update_docomo_display_map.pl
 bin/update_ez_model_list.pl
 Changes
+inc/Module/AutoInstall.pm
 inc/Module/Install.pm
 inc/Module/Install/AuthorTests.pm
+inc/Module/Install/AutoInstall.pm
 inc/Module/Install/Base.pm
 inc/Module/Install/Can.pm
 inc/Module/Install/Fetch.pm
@@ -1407,6 +1410,7 @@ lib/Moxy/Attribute/CarrierHook.pm
 lib/Moxy/Component/Context.pm
 lib/Moxy/Manual/HackingJA.pod
 lib/Moxy/Plugin.pm
+lib/Moxy/Plugin/AuthorizationCutter.pm
 lib/Moxy/Plugin/Bookmark.pm
 lib/Moxy/Plugin/ControlPanel.pm
 lib/Moxy/Plugin/CookieCutter.pm
@@ -1436,14 +1440,16 @@ lib/Moxy/Plugin/StripScripts.pm
 lib/Moxy/Plugin/UserAgentSwitcher.pm
 lib/Moxy/Plugin/UserID.pm
 lib/Moxy/Plugin/XMLisHTML.pm
+lib/Moxy/Request.pm
 lib/Moxy/Session/State/BasicAuth.pm
 lib/Moxy/Util.pm
 Makefile.PL
 MANIFEST			This list of files
 META.yml
-moxy.pl
+moxy.psgi
 README
 t/00.load.t
+t/mech.t
 t/Plugin-Server-rewrite_css.t
 t/Plugin-Server-rewrite_html.t
 t/Plugins/DisableTableTag.t

@@ -4,11 +4,12 @@ author:
   - 'Kan Fushihara'
 build_requires:
   ExtUtils::MakeMaker: 6.42
+  HTML::StripScripts::Parser: 0
   Test::Requires: 0
 configure_requires:
   ExtUtils::MakeMaker: 6.42
 distribution_type: module
-generated_by: 'Module::Install version 1'
+generated_by: 'Module::Install version 1.01'
 license: perl
 meta-spec:
   url: http://module-build.sourceforge.net/META-spec-v1.4.html
@@ -30,21 +31,21 @@ requires:
   Encode::JP::Mobile: 0.25
   Filter::Util::Call: 0
   HTML::ReplacePictogramMobileJp: 0.06
-  HTML::Scrubber: 0
   HTML::Tree: 3.23
   HTML::TreeBuilder::XPath: 0.09
   HTTP::Cookies: 0
-  HTTP::MobileAttribute: 0.13
-  HTTP::Session: 0.41
+  HTTP::MobileAttribute: 0.23
+  HTTP::Session: 0.29
+  NDBM_File: 0
   Params::Validate: 0.91
   Path::Class: 0
-  Plack: 0.9032
+  Plack: 0.9978
   Plack::Middleware::ReverseProxy: 0.05
   Template: 2.19
-  Test::More: 0.96
+  Test::More: 0.88
   UNIVERSAL::require: 0.11
   perl: 5.8.0
 resources:
   license: http://dev.perl.org/licenses/
   repository: git://github.com/kan/moxy.git
-version: 0.60
+version: 0.57

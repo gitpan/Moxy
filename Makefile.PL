@@ -28,7 +28,6 @@ requires 'Path::Class';
 requires 'HTTP::Session' => 0.41;
 requires 'HTTP::Cookies'; # part of LWP
 requires 'Test::More' => 0.96;
-requires 'NDBM_File' => 1.12;
 
 test_requires('Test::More');
 test_requires('Test::Requires');

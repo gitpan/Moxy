@@ -8,7 +8,7 @@ build_requires:
 configure_requires:
   ExtUtils::MakeMaker: 6.42
 distribution_type: module
-generated_by: 'Module::Install version 1'
+generated_by: 'Module::Install version 1.01'
 license: perl
 meta-spec:
   url: http://module-build.sourceforge.net/META-spec-v1.4.html
@@ -30,7 +30,6 @@ requires:
   Encode::JP::Mobile: 0.25
   Filter::Util::Call: 0
   HTML::ReplacePictogramMobileJp: 0.06
-  HTML::Scrubber: 0
   HTML::Tree: 3.23
   HTML::TreeBuilder::XPath: 0.09
   HTTP::Cookies: 0
@@ -47,4 +46,4 @@ requires:
 resources:
   license: http://dev.perl.org/licenses/
   repository: git://github.com/kan/moxy.git
-version: 0.60
+version: 0.63

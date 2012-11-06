@@ -4,6 +4,7 @@ assets/plugins/Bookmark/panel.tt
 assets/plugins/ControlPanel/panelcontainer.tt
 assets/plugins/GPS/iarea.tt
 assets/plugins/HTTPHeader/panel.tt
+assets/plugins/OpenSocial/panel.tt
 assets/plugins/Pictogram/image/E/EC40.gif
 assets/plugins/Pictogram/image/E/EC41.gif
 assets/plugins/Pictogram/image/E/EC42.gif
@@ -1389,20 +1390,12 @@ inc/Module/Install/AuthorTests.pm
 inc/Module/Install/Base.pm
 inc/Module/Install/Can.pm
 inc/Module/Install/Fetch.pm
-inc/Module/Install/Include.pm
 inc/Module/Install/Makefile.pm
 inc/Module/Install/Metadata.pm
 inc/Module/Install/Repository.pm
 inc/Module/Install/Scripts.pm
-inc/Module/Install/TestBase.pm
 inc/Module/Install/Win32.pm
 inc/Module/Install/WriteAll.pm
-inc/Spiffy.pm
-inc/Test/Base.pm
-inc/Test/Base/Filter.pm
-inc/Test/Builder.pm
-inc/Test/Builder/Module.pm
-inc/Test/More.pm
 lib/Moxy.pm
 lib/Moxy/Attribute/CarrierHook.pm
 lib/Moxy/Component/Context.pm
@@ -1423,6 +1416,7 @@ lib/Moxy/Plugin/GPS/ThirdForce.pm
 lib/Moxy/Plugin/Hosts.pm
 lib/Moxy/Plugin/HTTPHeader.pm
 lib/Moxy/Plugin/LocationBar.pm
+lib/Moxy/Plugin/OpenSocial.pm
 lib/Moxy/Plugin/Pictogram.pm
 lib/Moxy/Plugin/QRCode.pm
 lib/Moxy/Plugin/RefererCutter.pm
@@ -1443,6 +1437,7 @@ lib/Moxy/Session/State/BasicAuth.pm
 lib/Moxy/Util.pm
 Makefile.PL
 MANIFEST			This list of files
+MANIFEST.SKIP
 META.yml
 moxy.psgi
 README
@@ -1464,7 +1459,9 @@ t/Plugins/StripScripts.t
 t/Plugins/UserAgentSwitcher.t
 t/Session-State-BasicAuth.t
 TODO
-xt/98_perlcritic.t
-xt/perlcriticrc
-xt/pod.t
-xt/spelling.t
+xt/01_podspell.t
+xt/02_perlcritic.t
+xt/03_pod.t
+xt/04_minimum_version.t
+xt/05_cpan_meta.t
+xt/06_meta_author.t
